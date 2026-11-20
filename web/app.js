@@ -501,6 +501,11 @@ function setupEventListeners() {
   document.getElementById('btnCloseHelp').addEventListener('click', () => closeModal('helpModal'));
   document.getElementById('btnCloseHelpBottom').addEventListener('click', () => closeModal('helpModal'));
 
+  // About Modal
+  document.getElementById('btnAbout').addEventListener('click', () => openModal('aboutModal'));
+  document.getElementById('btnCloseAbout').addEventListener('click', () => closeModal('aboutModal'));
+  document.getElementById('btnCloseAboutBottom').addEventListener('click', () => closeModal('aboutModal'));
+
   // Terminal Modal
   document.getElementById('btnCloseModal').addEventListener('click', () => closeModal('logModal'));
   document.getElementById('btnCloseModalBottom').addEventListener('click', () => closeModal('logModal'));

@@ -26,6 +26,9 @@ function Write-Header {
     Write-Host "  v1.0" -ForegroundColor Yellow
     Write-Host "      Non-Root | Reversible | Knox & Warranty Safe" -ForegroundColor DarkCyan
     Write-Host "============================================================" -ForegroundColor Cyan
+    Write-Host " [!] DISCLAIMER: Use at your own risk. The author is not" -ForegroundColor DarkYellow
+    Write-Host "     responsible for any damage or data loss to your device." -ForegroundColor DarkYellow
+    Write-Host "============================================================" -ForegroundColor Cyan
     Write-Host ""
 }
 

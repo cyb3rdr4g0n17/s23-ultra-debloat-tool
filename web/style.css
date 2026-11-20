@@ -718,3 +718,37 @@ h1 {
     flex-direction: column;
   }
 }
+
+
+/* Disclaimer Banner */
+.disclaimer-banner {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.disclaimer-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.disclaimer-text {
+  font-size: 0.8rem;
+  color: #fca5a5;
+  line-height: 1.4;
+}
+
+.disclaimer-box {
+  background: rgba(239, 68, 68, 0.08);
+  border-left: 3px solid #ef4444;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin: 12px 0 16px;
+  font-size: 0.82rem;
+  color: #fca5a5;
+}
