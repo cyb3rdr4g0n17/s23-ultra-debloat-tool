@@ -1,3 +1,8 @@
+// Galaxy S23 Ultra Debloat Studio - WebADB Integration
+import { Adb, AdbDaemonTransport } from 'https://cdn.jsdelivr.net/npm/@yume-chan/adb@1.1.0/+esm';
+import { AdbDaemonWebUsbDeviceManager } from 'https://cdn.jsdelivr.net/npm/@yume-chan/adb-daemon-webusb@1.1.0/+esm';
+import AdbWebCredentialStore from 'https://cdn.jsdelivr.net/npm/@yume-chan/adb-credential-web@1.1.0/+esm';
+
 // S23 Ultra Master Package Metadata
 const MASTER_PACKAGES = [
   {
@@ -321,7 +326,11 @@ const MASTER_PACKAGES = [
 let selectedPackageIds = new Set();
 let currentFilter = 'all';
 let currentSearch = '';
-let connectedUsbDevice = null;
+
+// Active Real ADB Connection
+let activeAdb = null;
+let activeDeviceName = '';
+const credentialStore = new AdbWebCredentialStore("S23UltraDebloatStudio");
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -358,7 +367,6 @@ function updateSelectionUI() {
   document.getElementById('dockSelectedCount').textContent = count;
   document.getElementById('btnCount').textContent = count;
 
-  // Update card styling and checkbox states
   document.querySelectorAll('.package-card').forEach(card => {
     const pkgId = card.dataset.id;
     const isChecked = selectedPackageIds.has(pkgId);
@@ -373,10 +381,8 @@ function renderPackages() {
   container.innerHTML = '';
 
   const filtered = MASTER_PACKAGES.filter(pkg => {
-    // Tier filter
     if (currentFilter !== 'all' && pkg.tier !== currentFilter) return false;
 
-    // Search query
     if (currentSearch) {
       const q = currentSearch.toLowerCase();
       const matchName = pkg.name.toLowerCase().includes(q);
@@ -420,7 +426,6 @@ function renderPackages() {
       </div>
     `;
 
-    // Click on card or checkbox toggles selection
     card.addEventListener('click', (e) => {
       if (e.target.tagName !== 'INPUT') {
         const cb = card.querySelector('.custom-checkbox');
@@ -437,7 +442,6 @@ function togglePackage(id, shouldSelect) {
   const pkg = MASTER_PACKAGES.find(p => p.id === id);
 
   if (shouldSelect) {
-    // If it's a caution package, give an alert warning
     if (pkg && pkg.tier === 'caution') {
       const ok = confirm(`⚠️ CAUTION: "${pkg.name}" affects hardware usability or features.\n\nImpact:\n${pkg.removal_impact}\n\nAre you sure you want to mark it for removal?`);
       if (!ok) {
@@ -477,7 +481,6 @@ function setupEventListeners() {
   });
 
   document.getElementById('btnSelectAll').addEventListener('click', () => {
-    // Select all currently visible
     document.querySelectorAll('.package-card').forEach(card => {
       selectedPackageIds.add(card.dataset.id);
     });
@@ -493,8 +496,8 @@ function setupEventListeners() {
     resetToDefaults();
   });
 
-  // Connect WebUSB
-  document.getElementById('btnConnect').addEventListener('click', handleConnectWebUSB);
+  // Connect WebUSB button
+  document.getElementById('btnConnect').addEventListener('click', connectRealWebUsb);
 
   // Help Modal
   document.getElementById('btnAdbHelp').addEventListener('click', () => openModal('helpModal'));
@@ -525,7 +528,12 @@ function setupEventListeners() {
       alert('Please select at least one package to uninstall.');
       return;
     }
-    executeBatch('uninstall');
+    // Verify phone is physically connected!
+    if (!activeAdb) {
+      alert('⚠️ No Device Connected!\n\nPlease click "Connect Phone (WebUSB)" at the top first so we can communicate with your Galaxy S23 Ultra.\n\nAlternatively, click "Copy ADB Shell Script" to run commands on your PC terminal or use debloat.bat.');
+      return;
+    }
+    executeRealAdbBatch('uninstall');
   });
 
   // Restore Selected
@@ -534,44 +542,127 @@ function setupEventListeners() {
       alert('Please select the packages you wish to restore.');
       return;
     }
-    executeBatch('restore');
+    if (!activeAdb) {
+      alert('⚠️ No Device Connected!\n\nPlease click "Connect Phone (WebUSB)" at the top first so we can restore packages on your Galaxy S23 Ultra.');
+      return;
+    }
+    executeRealAdbBatch('restore');
   });
 }
 
-// WebUSB ADB Connection
-async function handleConnectWebUSB() {
-  if (!navigator.usb) {
-    alert('WebUSB is not supported in this browser. Please use Google Chrome, Microsoft Edge, or Brave, or run debloat.bat!');
+// REAL WEB-ADB CONNECTION OVER WEBUSB
+async function connectRealWebUsb() {
+  const deviceManager = AdbDaemonWebUsbDeviceManager.BROWSER;
+  if (!deviceManager) {
+    alert('WebUSB is not supported in this browser or context.\n\nPlease ensure:\n1. You are using Chrome, Edge, or Brave.\n2. The site is running over HTTPS.\n\nYou can also use the local debloat.bat script.');
     return;
   }
 
+  const connectBtn = document.getElementById('btnConnect');
+  const connectText = document.getElementById('connectText');
+
   try {
-    const device = await navigator.usb.requestDevice({
-      filters: [] // Allow user to pick their Samsung device
+    connectText.textContent = 'Pairing device...';
+    
+    // 1. Request USB device with WebUSB filter
+    const device = await deviceManager.requestDevice();
+    if (!device) {
+      connectText.textContent = 'Connect Phone (WebUSB)';
+      return;
+    }
+
+    connectText.textContent = 'Authorizing...';
+
+    // 2. Open connection stream
+    const connection = await device.connect();
+
+    // 3. Authenticate with RSA credentials (triggers Android popup!)
+    const transport = await AdbDaemonTransport.authenticate({
+      serial: device.serial,
+      connection: connection,
+      credentialStore: credentialStore,
     });
 
-    if (device) {
-      await device.open();
-      connectedUsbDevice = device;
+    // 4. Create high-level ADB interface
+    activeAdb = new Adb(transport);
 
-      const banner = document.getElementById('deviceBanner');
-      banner.className = 'device-banner connected';
-      document.getElementById('deviceModelText').textContent = device.productName || 'Samsung Galaxy S23 Ultra';
-      document.getElementById('deviceSerialText').textContent = `Connected via WebUSB (Vendor ID: 0x${device.vendorId.toString(16)})`;
-      document.getElementById('connectText').textContent = 'Phone Connected';
+    // 5. Query REAL phone properties
+    let model = 'Galaxy S23 Ultra';
+    let brand = 'Samsung';
+    let androidVer = '';
 
-      alert(`Connected to: ${device.productName || 'Samsung Device'}!\nEnsure you tapped "Allow USB Debugging" on your phone.`);
+    try {
+      model = await activeAdb.getProp('ro.product.model') || model;
+      brand = await activeAdb.getProp('ro.product.brand') || brand;
+      androidVer = await activeAdb.getProp('ro.build.version.release') || '';
+    } catch (e) {
+      console.warn('Could not read prop:', e);
     }
+
+    activeDeviceName = `${brand.toUpperCase()} ${model}`;
+
+    // Update UI
+    const banner = document.getElementById('deviceBanner');
+    banner.className = 'device-banner connected';
+    document.getElementById('deviceModelText').textContent = activeDeviceName;
+    document.getElementById('deviceSerialText').textContent = `Connected via WebUSB | Android ${androidVer} | Serial: ${device.serial}`;
+    connectText.textContent = 'Connected: ' + model;
+    connectBtn.classList.remove('btn-primary');
+    connectBtn.classList.add('btn-secondary');
+
+    alert(`✓ Connected to ${activeDeviceName}!\n\nYou can now select packages and perform real-time uninstall/restore.`);
+
   } catch (err) {
-    console.error('WebUSB error:', err);
-    if (!err.message.includes('No device selected')) {
-      alert('Connection error: ' + err.message + '\n\nMake sure USB Debugging is ON and your screen is unlocked.');
+    console.error('Connection failed:', err);
+    activeAdb = null;
+    connectText.textContent = 'Connect Phone (WebUSB)';
+    
+    if (err.message && err.message.includes('No device selected')) {
+      return;
     }
+    alert(`Connection Error: ${err.message}\n\nMake sure:\n1. "USB Debugging" is toggled ON in Developer Options.\n2. Tap "Allow" when the RSA authorization prompt appears on your phone screen.\n3. Your screen is unlocked.`);
   }
 }
 
-// Execute commands (either via WebUSB or Interactive Simulation with Instant Script Fallback)
-async function executeBatch(action) {
+// Stream reading helpers for Real ADB
+async function readReadableStream(stream) {
+  const reader = stream.getReader();
+  const decoder = new TextDecoder();
+  let result = '';
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      result += decoder.decode(value, { stream: true });
+    }
+    result += decoder.decode();
+  } finally {
+    reader.releaseLock();
+  }
+  return result.trim();
+}
+
+async function drainStream(stream) {
+  const reader = stream.getReader();
+  try {
+    while (true) {
+      const { done } = await reader.read();
+      if (done) break;
+    }
+  } catch (e) {
+    // drain silently
+  } finally {
+    reader.releaseLock();
+  }
+}
+
+// REAL ADB EXECUTION LOOP
+async function executeRealAdbBatch(action) {
+  if (!activeAdb) {
+    alert('Please connect your phone first!');
+    return;
+  }
+
   openModal('logModal');
   const term = document.getElementById('terminalLogs');
   const bar = document.getElementById('progressBar');
@@ -581,12 +672,14 @@ async function executeBatch(action) {
   bar.style.width = '0%';
 
   const isUninstall = action === 'uninstall';
-  title.textContent = isUninstall ? 'Debloat Execution Console' : 'Package Restore Console';
+  title.textContent = isUninstall ? 'Debloat Execution Console (Live ADB)' : 'Package Restore Console (Live ADB)';
 
-  logLine(`[INIT] Starting ${action.toUpperCase()} process for ${selectedPackageIds.size} packages...`, 'info');
+  logLine(`[CONNECT] Active Device: ${activeDeviceName}`, 'info');
+  logLine(`[INIT] Running real ${action.toUpperCase()} process for ${selectedPackageIds.size} packages on device...`, 'info');
 
   const targets = Array.from(selectedPackageIds).map(id => MASTER_PACKAGES.find(p => p.id === id)).filter(Boolean);
   let index = 0;
+  let successCount = 0;
 
   for (const pkg of targets) {
     index++;
@@ -597,20 +690,30 @@ async function executeBatch(action) {
       ? `pm uninstall -k --user 0 ${pkg.id}`
       : `cmd package install-existing ${pkg.id}`;
 
-    logLine(`[${index}/${targets.length}] Executing: ${cmd}`, 'info');
+    logLine(`[${index}/${targets.length}] adb shell ${cmd}`, 'info');
 
-    // Simulate real execution step latency or actual bridge
-    await new Promise(r => setTimeout(r, 120));
+    try {
+      // Execute command on device via WebADB
+      const process = await activeAdb.subprocess.spawn(cmd);
+      drainStream(process.stderr);
+      const output = await readReadableStream(process.stdout);
+      await process.exited;
 
-    if (isUninstall) {
-      logLine(`  ✓ Successfully uninstalled ${pkg.name} (${pkg.id})`, 'success');
-    } else {
-      logLine(`  ✓ Successfully restored ${pkg.name} (${pkg.id})`, 'success');
+      if (output.includes('Success') || output.includes('installed for user')) {
+        logLine(`  ✓ ${pkg.name}: ${output || 'Success'}`, 'success');
+        successCount++;
+      } else if (output.includes('not installed for 0')) {
+        logLine(`  - ${pkg.name}: Already uninstalled`, 'warn');
+      } else {
+        logLine(`  ${output || 'OK'}`, 'info');
+      }
+    } catch (cmdErr) {
+      logLine(`  ✕ Error: ${cmdErr.message}`, 'error');
     }
   }
 
-  logLine(`\n[COMPLETE] ${action === 'uninstall' ? 'Debloat' : 'Restore'} finished!`, 'success');
-  logLine(`[NOTE] Please restart your Galaxy S23 Ultra to flush running background daemons.`, 'warn');
+  logLine(`\n[COMPLETE] Done! ${successCount} packages updated on device.`, 'success');
+  logLine(`[NOTE] Please restart your Galaxy S23 Ultra now to clear background cached services.`, 'warn');
 }
 
 function logLine(msg, type = 'info') {
