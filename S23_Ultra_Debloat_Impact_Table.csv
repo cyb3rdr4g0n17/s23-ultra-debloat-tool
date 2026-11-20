@@ -1,0 +1,36 @@
+App Name,Package Name,Status,Category,Impact / What Removing Affects
+Meta App Installer,com.facebook.system,SAFE TO REMOVE,Meta Bloat,Background installer for Meta apps. Facebook/Insta/WhatsApp still work 100%.
+Meta App Manager,com.facebook.appmanager,SAFE TO REMOVE,Meta Bloat,Meta auto-update background daemon.
+Meta Services,com.facebook.services,SAFE TO REMOVE,Meta Bloat,Background analytics & telemetry daemon for Meta.
+Knox Analytics Uploader,com.samsung.android.knox.analytics.uploader,SAFE TO REMOVE,Telemetry,Uploads Knox device analytics to Samsung servers.
+NetworkDiagnostic,com.samsung.android.networkdiagnostic,SAFE TO REMOVE,Telemetry,Diagnostic logger for cellular & Wi-Fi networks.
+Customization Service,com.samsung.android.rubin.app,SAFE TO REMOVE,Telemetry,Samsung Rubin tracks habits/places to serve targeted recommendations.
+Federated Compute,com.google.android.federatedcompute,SAFE TO REMOVE,Telemetry,Google on-device machine learning & telemetry collector.
+Market Feedback Agent,com.google.android.feedback,SAFE TO REMOVE,Telemetry,Google Play crash/feedback diagnostic reporter.
+ConfigAPK,android.autoinstalls.config.samsung,SAFE TO REMOVE,Setup Bloat,Carrier/partner auto-install stub used during phone setup.
+ChromeCustomizations,com.sec.android.app.chromecustomizations,SAFE TO REMOVE,OEM Bloat,Carrier/Samsung custom bookmarks and homepages for Chrome.
+Partner Bookmarks,com.android.providers.partnerbookmarks,SAFE TO REMOVE,OEM Bloat,Partner bookmark provider.
+BBCAgent,com.samsung.android.bbc.bbcagent,SAFE TO REMOVE,Knox Enterprise,Knox B2B enterprise container agent. Not needed on personal devices.
+Samsung Kids Installer,com.samsung.android.kidsinstaller,SAFE TO REMOVE,Bloat,Installer stub for Samsung Kids mode.
+Crocro and friends,com.samsung.android.app.camera.sticker.facearavatar.preload,SAFE TO REMOVE,AR Bloat,Cartoon AR sticker pack inside Samsung Camera.
+Sticker Center,com.samsung.android.stickercenter,SAFE TO REMOVE,Bloat,Samsung sticker indexing service for Samsung Keyboard.
+Favorite Contacts,com.sec.android.widgetapp.easymodecontactswidget,SAFE TO REMOVE,Bloat,Widget for Easy Mode launcher.
+Parental controls,com.samsung.android.app.parentalcare,SAFE TO REMOVE,Bloat,Parental control stub (unless managing a child's account).
+Voice Access,com.google.android.apps.accessibility.voiceaccess,SAFE TO REMOVE,Accessibility,Google voice-guided accessibility control.
+Bixby,com.samsung.android.bixby.agent,OPTIONAL,Voice Assistant,Bixby Voice Assistant. Safe if not using Bixby voice (Modes & Routines still works).
+Voice wake-up,com.samsung.android.bixby.wakeup,OPTIONAL,Voice Assistant,Listens for 'Hi Bixby' wake word in background. Microphones poll constantly.
+Bixby Vision,com.samsung.android.visionintelligence,OPTIONAL,Camera / S Pen,Disables Bixby Vision image scanning in Camera/Gallery. Google Lens still works.
+BixbyVision Framework,com.samsung.android.bixbyvision.framework,OPTIONAL,Camera / S Pen,Underlying framework for Bixby Vision features.
+Live messages,com.samsung.android.service.live_drawing,OPTIONAL,S Pen Feature,S Pen Live Messages (animated glitter/neon GIF drawing tool).
+Galaxy Avatar,com.samsung.android.aremoji,OPTIONAL,AR Bloat,AR Emoji 3D avatars in Camera/Keyboard.
+Google Play Services for AR,com.google.ar.core,OPTIONAL,AR Core,ARCore library for augmented reality apps (IKEA Place, Google 3D Search).
+AI wallpaper,com.google.android.apps.aiwallpapers,OPTIONAL,One UI Feature,Galaxy AI Generative Wallpaper generator in One UI 6.1+.
+Samsung Wallpaper,com.samsung.android.wallpaper.live,OPTIONAL,Wallpapers,Live and video wallpaper picker service. Static wallpapers unaffected.
+Personal data intelligence,com.samsung.android.smartsuggestions,OPTIONAL,Intelligence,Smart Suggestions widgets and keyboard message suggestions.
+Digital Key Framework,com.samsung.android.carkey,OPTIONAL,Samsung Wallet,Unlocking compatible cars (BMW/Hyundai) via NFC/UWB.
+Samsung Wallet Digital Key,com.samsung.android.dkey,OPTIONAL,Samsung Wallet,UI module for digital car key inside Samsung Wallet.
+People,com.samsung.android.service.peoplestripe,OPTIONAL,Edge Panels,Quick contacts panel on the Edge panel tab.
+Magnifier,com.sec.android.app.magnifier,OPTIONAL,Tools,Samsung accessibility camera magnifier tool.
+EasyOneHand,com.sec.android.easyonehand,KEEP / CAUTION,Hardware Usability,One-Handed Mode (swipe down on bottom edge to shrink screen). Critical for 6.8' S23 Ultra.
+Adapt sound,com.sec.hearingadjust,KEEP / CAUTION,Audio Quality,Custom hearing profile and frequency equalizer (Settings > Sound > Sound quality).
+YouTube,com.google.android.youtube,KEEP / CAUTION,Media,Official YouTube app. Only remove if using YouTube ReVanced or NewPipe.

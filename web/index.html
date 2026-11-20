@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Galaxy S23 Ultra Debloat Studio</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-area">
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="5" y="2" width="14" height="20" rx="3" ry="3"></rect>
+            <line x1="12" y1="18" x2="12.01" y2="18"></line>
+          </svg>
+        </div>
+        <div>
+          <div class="title-row">
+            <h1>S23 Ultra Debloat Studio</h1>
+            <span class="badge-pill">Non-Root ADB</span>
+          </div>
+          <p class="subtitle">Clean, battery-saving debloat tailored for Samsung One UI</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button id="btnConnect" class="btn btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+          <span id="connectText">Connect Phone (WebUSB)</span>
+        </button>
+        <button id="btnAdbHelp" class="btn btn-secondary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          Guide & CLI
+        </button>
+      </div>
+    </header>
+
+    <!-- Device Connection Status Banner -->
+    <section id="deviceBanner" class="device-banner disconnected">
+      <div class="device-status-info">
+        <span class="status-indicator"></span>
+        <div class="device-labels">
+          <strong id="deviceModelText">No Device Connected</strong>
+          <span id="deviceSerialText">Connect your S23 Ultra via USB and click Connect</span>
+        </div>
+      </div>
+      <div class="device-hints">
+        <span class="hint-tag">USB Debugging Required</span>
+        <span class="hint-tag">Chrome / Edge / Brave</span>
+      </div>
+    </section>
+
+    <!-- Toolbar & Filters -->
+    <section class="toolbar">
+      <div class="search-box">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="searchInput" placeholder="Search app name or package id (e.g. bixby, meta)...">
+      </div>
+
+      <div class="filter-tabs">
+        <button class="tab-btn active" data-filter="all">All <span id="countAll">(35)</span></button>
+        <button class="tab-btn safe-tab" data-filter="safe">Safe to Remove <span id="countSafe">(18)</span></button>
+        <button class="tab-btn optional-tab" data-filter="optional">Optional Features <span id="countOptional">(14)</span></button>
+        <button class="tab-btn caution-tab" data-filter="caution">Caution / Traps <span id="countCaution">(3)</span></button>
+      </div>
+    </section>
+
+    <!-- Quick Selection Actions -->
+    <div class="selection-bar">
+      <div class="quick-buttons">
+        <button id="btnSelectSafe" class="btn btn-sm btn-outline-success">Select Safe Only (Recommended)</button>
+        <button id="btnSelectAll" class="btn btn-sm btn-outline">Select All Visible</button>
+        <button id="btnDeselectAll" class="btn btn-sm btn-outline">Clear All</button>
+        <button id="btnResetDefault" class="btn btn-sm btn-outline">Reset to Defaults</button>
+      </div>
+      <div class="selection-summary">
+        Selected: <strong id="selectedCounter">18</strong> / 35
+      </div>
+    </div>
+
+    <!-- Package List Container -->
+    <main class="packages-grid" id="packagesContainer">
+      <!-- Injected by JavaScript -->
+    </main>
+
+    <!-- Floating Execution Dock -->
+    <footer class="action-dock">
+      <div class="dock-content">
+        <div class="dock-stats">
+          <span class="counter-bubble" id="dockSelectedCount">18</span>
+          <div>
+            <div class="dock-title">Ready to Process</div>
+            <div class="dock-subtitle">Zero data loss: packages can be restored at any time</div>
+          </div>
+        </div>
+
+        <div class="dock-actions">
+          <button id="btnCopyCommands" class="btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            Copy ADB Shell Script
+          </button>
+          <button id="btnRestoreSelected" class="btn btn-warning">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="1 4 1 10 7 10"></polyline>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+            </svg>
+            Restore Selected
+          </button>
+          <button id="btnExecuteDebloat" class="btn btn-danger">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            Uninstall Selected (<span id="btnCount">18</span>)
+          </button>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Terminal / Modal for Execution Logs -->
+  <div id="logModal" class="modal-backdrop">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="terminal-dot red"></span>
+          <span class="terminal-dot yellow"></span>
+          <span class="terminal-dot green"></span>
+          <span id="modalHeaderTitle">Execution Console</span>
+        </div>
+        <button id="btnCloseModal" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-progress">
+        <div class="progress-bar-fill" id="progressBar"></div>
+      </div>
+      <div class="terminal-body" id="terminalLogs">
+        <p class="log-line info">[INFO] Ready to execute commands...</p>
+      </div>
+      <div class="modal-footer">
+        <button id="btnCopyLogs" class="btn btn-sm btn-outline">Copy Logs</button>
+        <button id="btnCloseModalBottom" class="btn btn-sm btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guide / ADB Help Modal -->
+  <div id="helpModal" class="modal-backdrop">
+    <div class="modal-window help-window">
+      <div class="modal-header">
+        <div class="modal-title">
+          <h3>How to Use & Fast ADB Setup</h3>
+        </div>
+        <button id="btnCloseHelp" class="close-btn">&times;</button>
+      </div>
+      <div class="help-body">
+        <h4>1. Enable Developer Options & USB Debugging</h4>
+        <ol>
+          <li>On your S23 Ultra, open <strong>Settings > About phone > Software information</strong>.</li>
+          <li>Tap <strong>Build number</strong> 7 times until it says <em>"You are now a developer!"</em>.</li>
+          <li>Go back to <strong>Settings > Developer options</strong> and toggle <strong>USB debugging</strong> ON.</li>
+          <li>Plug your phone into your laptop via USB cable.</li>
+        </ol>
+
+        <h4>2. Two Ways to Run</h4>
+        <div class="help-cards">
+          <div class="help-card">
+            <h5>Option A: WebUSB Direct (Chrome / Edge)</h5>
+            <p>Click the <strong>Connect Phone (WebUSB)</strong> button at the top. Allow your browser to pair with the phone and tap <strong>Allow USB Debugging</strong> on your phone screen.</p>
+          </div>
+          <div class="help-card">
+            <h5>Option B: Windows Double-Click Script</h5>
+            <p>Simply double-click <code>debloat.bat</code> in the repository folder. It auto-downloads ADB if needed and guides you through an interactive menu!</p>
+          </div>
+        </div>
+
+        <h4>3. The 3 Traps to Watch Out For:</h4>
+        <ul>
+          <li><strong>One-Handed Mode (<code>com.sec.android.easyonehand</code>):</strong> Do not remove if you shrink the screen on this big phone!</li>
+          <li><strong>Adapt Sound (<code>com.sec.hearingadjust</code>):</strong> Do not remove if you customize audio EQ for Galaxy Buds.</li>
+          <li><strong>YouTube (<code>com.google.android.youtube</code>):</strong> Keep unchecked unless using YouTube ReVanced.</li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button id="btnCloseHelpBottom" class="btn btn-primary">Got it!</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
